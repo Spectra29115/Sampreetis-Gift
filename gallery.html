@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Love Gallery</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, rgba(224, 121, 155, 0.1), rgba(245, 203, 92, 0.1));
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background photos */
+        .background-photo {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: all 0.8s ease-in-out;
+        }
+
+        /* Main content */
+        .gallery-container {
+            position: relative;
+            z-index: 50;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .gallery-title {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #000000;
+            margin-bottom: 1rem;
+        }
+
+        .gallery-subtitle {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        /* Photo display */
+        .photo-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .current-photo {
+            position: relative;
+            width: 1000px;
+            height: 750px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 30px rgba(224, 121, 155, 0.3);
+        }
+
+        .current-photo:hover {
+            transform: scale(1.05);
+        }
+
+        .current-photo.playing {
+            animation: love-pulse 2s infinite;
+        }
+
+        .current-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .music-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: white;
+            font-size: 1.5rem;
+            animation: bounce 1s infinite;
+        }
+        /* Blur overlay */
+        .blur-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .blur-overlay.revealed {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .reveal-message {
+            color: white;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .reveal-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            animation: bounce 1s infinite;
+        }
+        .photo-title {
+            text-align: center;
+            margin-top: 2.5rem;
+        }
+
+        .photo-title h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 0.25rem;
+        }
+
+        .photo-counter {
+            font-size: 0.875rem;
+            color: #000000;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #ff0000;
+            border: 2px solid #ff0055;
+        }
+
+        .btn-outline:hover {
+            background: #000000;
+            color: rgb(255, 255, 255);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #e0799b, #f5cb5c);
+            color: rgb(255, 255, 255);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+
+        /* Progress indicator */
+        .progress-indicator {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.current {
+            background: #e0799b;
+        }
+
+        .progress-dot.completed {
+            background: #ff0000;
+        }
+
+        .progress-dot.upcoming {
+            background: #ddd;
+        }
+
+        /* End message */
+        .end-message {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+        }
+
+        .end-message .title {
+            color: #ff0000;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .end-message .subtitle {
+            font-size: 0.875rem;
+            color: #000000;
+        }
+
+        /* Animations */
+        @keyframes love-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 100000px) {
+            .gallery-title {
+                font-size: 2rem;
+            }
+
+            .current-photo {
+                width: 1000px;
+                height: 750px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gallery-container">
+        <div class="gallery-header">
+            <h1 class="gallery-title">Our Love Story 💕</h1>
+            <p class="gallery-subtitle">
+                Double-click to see the next memory
+            </p>
+        </div>
+
+
+        <!-- Current Photo -->
+        <div class="photo-container">
+            <div class="current-photo" id="currentPhoto">
+                <img id="photoImage" src="" alt="">
+
+
+                <!-- Blur overlay with message -->
+                <div class="blur-overlay" id="blurOverlay">
+                    <div class="reveal-icon">🔞</div>
+                    <div class="reveal-message">OPEN WITH CAUTION!! Privacy Ahead</div>
+                </div>
+
+                <!-- Music indicator -->
+                <div class="music-indicator" id="musicIndicator" style="display: none;">🎵</div>
+            </div>
+
+            <!-- Photo title -->
+            <div class="photo-title">
+                <h3 id="photoTitle"></h3>
+                <p class="photo-counter" id="photoCounter"></p>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <a href="index.html" class="btn btn-outline">
+                Back to Letter 💌
+            </a>
+
+            <button class="btn btn-primary" id="resetBtn" style="display: none;">
+                Start Over 🔄
+            </button>
+        </div>
+
+        <!-- Progress indicator -->
+        <div class="progress-indicator" id="progressIndicator">
+            <!-- Dots will be generated by JavaScript -->
+        </div>
+
+        <!-- End message -->
+        <div class="end-message" id="endMessage" style="display: none;">
+            <p class="title">
+                That is it till now. But we will create more wonderful memories.
+            </p>
+            <p class="subtitle">
+                I want to spend the rest of my life like this with you. <br> A Very Happy 19th Birthday To You Baby. I Love You Soo Muchh.
+            </p>
+        </div>
+    </div>
+
+    <!-- Hidden audio element -->
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        // Photo data - add your local images and songs here
+        // Create folders: 'images' and 'songs' next to this HTML file
+        const photos = [
+            {
+                id: 1,
+                src: 'images/photo_01.jpg',  // Place your first photo here
+                song: 'songs/song1.mp3',   // Place your first song here
+                title: "Our First Date + A very important bucket list task of urs"
+            },
+            {
+                id: 2,
+                src: 'images/photo_02.jpg',  // Place your second photo here
+                song: 'songs/song2.mp3',   // Place your second song here
+                title: "First proper makeout as far as i remember :)"
+            },
+            {
+                id: 3,
+                src: 'images/photo_03.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "One of ur fav pics"
+            },
+            {
+                id: 4,
+                src: 'images/photo_04.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "There wasnt a reason to put this in genuinely but i remember how u were looking at me"
+            },
+            {
+                id: 5,
+                src: 'images/photo_05.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "Some goofy moments"
+            },
+            {
+                id: 6,
+                src: 'images/photo_06.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "I can never get tired of those eyes of urs"
+            },
+            {
+                id: 7,
+                src: 'images/photo_07.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "Same shit"
+            },
+            {
+                id: 8,
+                src: 'images/photo_08.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "One of my fav pics while watching u sleep (Ghibli tho but still hella cute)"
+            },
+            {
+                id: 9,
+                src: 'images/photo_09.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "Us with our kids hehehexD"
+            },
+            {
+                id: 10,
+                src: 'images/photo_10.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "UKW :)"
+            },
+            {
+                id: 11,
+                src: 'images/photo_11.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "Relating ourselves to a great couple"
+            },
+            {
+                id: 12,
+                src: 'images/photo_12.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "Frankly the best boat ride ever. And cant be better"
+            },
+            {
+                id: 13,
+                src: 'images/photo_13.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "Us being cute after poundtown"
+            },
+            {
+                id: 14,
+                src: 'images/photo_14.jpg',  // Place your third photo here
+                song: 'songs/song3.mp3',   // Place your third song here
+                title: "Some poundtown moments :)"
+            }
+        ];
+
+        let currentPhotoIndex = 0;
+        let backgroundPhotos = [];
+        let isPlaying = false;
+        let revealedPhotos = new Set(); // Track which photos have been revealed
+
+        // DOM elements
+        const blurredPhotoIndex = 13;
+        const currentPhoto = document.getElementById('currentPhoto');
+        const photoImage = document.getElementById('photoImage');
+        const photoTitle = document.getElementById('photoTitle');
+        const photoCounter = document.getElementById('photoCounter');
+        const blurOverlay = document.getElementById('blurOverlay');
+        const musicIndicator = document.getElementById('musicIndicator');
+        const progressIndicator = document.getElementById('progressIndicator');
+        const resetBtn = document.getElementById('resetBtn');
+        const endMessage = document.getElementById('endMessage');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        function updateDisplay() {
+            const currentPhotoData = photos[currentPhotoIndex];
+
+            // Update image and title
+            photoImage.src = currentPhotoData.src;
+            photoImage.alt = currentPhotoData.title;
+            photoTitle.textContent = currentPhotoData.title;
+            photoCounter.textContent = `Photo ${currentPhotoIndex + 1} of ${photos.length}`;
+
+            // Reset blur overlay for new photos (unless already revealed)
+            if (currentPhotoIndex === blurredPhotoIndex && !revealedPhotos.has(currentPhotoIndex))  {
+                blurOverlay.classList.remove('revealed');
+            } else {
+                blurOverlay.classList.add('revealed');
+            }
+
+            // Auto-play the song for current photo
+            audioPlayer.src = currentPhotoData.song;
+            audioPlayer.play()
+                .then(() => setPlaying(true))
+                .catch((error) => console.log("Audio play failed:", error));
+
+            // Update progress dots
+            updateProgressDots();
+
+            // Show end message if at last photo
+            if (currentPhotoIndex === photos.length - 1) {
+                endMessage.style.display = 'block';
+            } else {
+                endMessage.style.display = 'none';
+            }
+
+            // Show reset button if there are background photos
+            if (backgroundPhotos.length > 0) {
+                resetBtn.style.display = 'inline-block';
+            }
+        }
+
+        function updateProgressDots() {
+            progressIndicator.innerHTML = '';
+            photos.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+
+                if (index === currentPhotoIndex) {
+                    dot.classList.add('current');
+                } else if (index < currentPhotoIndex) {
+                    dot.classList.add('completed');
+                } else {
+                    dot.classList.add('upcoming');
+                }
+
+                progressIndicator.appendChild(dot);
+            });
+        }
+
+        function handlePhotoDoubleClick() {
+            if (currentPhotoIndex < photos.length - 1) {
+                // Add current photo to background
+                addPhotoToBackground(photos[currentPhotoIndex]);
+
+                // Move to next photo
+                currentPhotoIndex++;
+
+                // Stop current audio
+                if (isPlaying) {
+                    audioPlayer.pause();
+                    setPlaying(false);
+                }
+
+                // Update display (which will auto-play the new song)
+                updateDisplay();
+            }
+        }
+
+        function addPhotoToBackground(photoData) {
+            const backgroundDiv = document.createElement('div');
+            backgroundDiv.className = 'background-photo';
+            backgroundDiv.style.backgroundImage = `url(${photoData.src})`;
+            backgroundDiv.style.opacity = '0.1';
+            backgroundDiv.style.zIndex = backgroundPhotos.length + 1;
+
+            document.body.appendChild(backgroundDiv);
+            backgroundPhotos.push({ element: backgroundDiv, data: photoData });
+
+            // Animate in
+            setTimeout(() => {
+                backgroundDiv.style.opacity = `${0.1 + (backgroundPhotos.length * 0.05)}`;
+            }, 100);
+        }
+
+        function setPlaying(playing) {
+            isPlaying = playing;
+            currentPhoto.classList.toggle('playing', playing);
+            musicIndicator.style.display = playing ? 'block' : 'none';
+        }
+
+        function resetGallery() {
+            // Remove background photos
+            backgroundPhotos.forEach(bg => {
+                bg.element.remove();
+            });
+            backgroundPhotos = [];
+
+            // Reset to first photo
+            currentPhotoIndex = 0;
+
+            // Clear revealed photos
+            revealedPhotos.clear();
+
+            // Stop audio
+            if (isPlaying) {
+                audioPlayer.pause();
+                setPlaying(false);
+            }
+
+            // Update display
+            updateDisplay();
+
+            // Hide reset button
+            resetBtn.style.display = 'none';
+        }
+
+        // Blur overlay click handler
+        function handleBlurOverlayClick(event) {
+            event.stopPropagation(); // Prevent double-click from triggering
+            blurOverlay.classList.add('revealed');
+            revealedPhotos.add(currentPhotoIndex);
+        }
+
+        // Event listeners
+        currentPhoto.addEventListener('dblclick', handlePhotoDoubleClick);
+        blurOverlay.addEventListener('click', handleBlurOverlayClick);
+        resetBtn.addEventListener('click', resetGallery);
+
+        // Audio event listeners
+        audioPlayer.addEventListener('ended', () => setPlaying(false));
+        audioPlayer.addEventListener('error', () => setPlaying(false));
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Letter</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, rgba(174, 0, 255, 0.349), rgba(245, 203, 92, 0.1));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        /*ENVELOPE*/
+        .envelope-container {
+            position: relative;
+        }
+
+        .envelope {
+            position: relative;
+            width: 320px;
+            height: 224px;
+            cursor: pointer;
+            transition: all 1s ease;
+        }
+
+        .envelope-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, #ff0000, #ffffff);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .envelope-base::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 2px solid rgb(0, 0, 0);
+            border-radius: 8px;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff0000, #ffffff);
+            border-radius: 10px;
+            clip-path: polygon(0 0, 100% 0, 50% 40%, 0 0);
+            transform-origin: top;
+            transition: transform 1.2s ease-out;
+        }
+
+        .envelope-flap.opened {
+            transform: rotateX(-180deg);
+        }
+
+        .heart-seal {
+            position: absolute;
+            top: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            animation: love-pulse 2s infinite;
+        }
+
+        .click-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000000;
+            font-weight: 600;
+            font-size: 1.125rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .click-text.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* LETTER */
+        .letter {
+            position: absolute;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%) scale(0.8);
+            width: 700px;
+            background: rgb(255, 255, 255);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(224, 121, 155, 0.2);
+            opacity: 0;
+            transition: all 0.5s ease 0.5s;
+        }
+
+        .letter.visible {
+            transform: translateX(-50%) translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .letter-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .letter-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e0799b;
+            margin-bottom: 0.5rem;
+        }
+
+        .letter-divider {
+            width: 64px;
+            height: 2px;
+            background: #e0799b;
+            margin: 0 auto;
+        }
+
+        .letter-content {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: #000000;
+        }
+
+        .letter-content p {
+            margin-bottom: 1rem;
+        }
+
+        .letter-highlight {
+            text-align: center;
+            font-weight: 600;
+            color: #670570;
+        }
+
+        /*GALLERY BUTTON*/
+        .gallery-button {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 1rem;
+            padding: 0.75rem 2rem;
+            background: linear-gradient(145deg, #f50000, #ffffff);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 0 30px rgba(224, 121, 155, 0.3);
+        }
+
+        .gallery-button:hover {
+            transform: scale(1.05);
+            background: linear-gradient(to right, rgb(255, 0, 0), rgba(255, 255, 255, 0.9));
+        }
+
+        .letter-signature {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        .letter-signature .name {
+            font-weight: 600;
+            color: #e0799b;
+        }
+
+        /* Animations */
+        @keyframes love-pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 640px) {
+            .envelope {
+                width: 280px;
+                height: 196px;
+            }
+
+            .letter {
+                width: 320px;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="envelope-container">
+        <!-- Envelope -->
+        <div class="envelope" id="envelope">
+            <!-- Envelope Base -->
+            <div class="envelope-base"></div>
+
+            <!-- Envelope Flap -->
+            <div class="envelope-flap" id="envelopeFlap">
+                <!-- Heart Seal -->
+                <div class="heart-seal">❤️</div>
+            </div>
+
+            <!-- Click Text -->
+            <div class="click-text" id="clickText">This is for you</div>
+        </div>
+
+        <!-- Letter -->
+        <div class="letter" id="letter">
+            <div class="letter-header">
+                <h2 class="letter-title">Hi Baby</h2>
+                <div class="letter-divider"></div>
+            </div>
+
+            <div class="letter-content">
+                <p>
+                    So 1st of all a VERY HAPPY FUCKING BIRTHDAY. Finally 19 holi. Demnn. I love you sooo muchhh and im really sorry im not there to celebrate such a special day with you. SO i have kinda done something my style and i hope it makes u feel a little special.
+                </p>
+                <p>
+                    This is something i created on my own for u and its a fruit of 2 fucking months. I really hope u like it.
+                </p>
+                <p class="letter-highlight">
+                    HERE WE GO!! <br>
+                    Here is a collection of all the time we spent together
+                </p>
+            </div>
+
+            <a href="gallery.html" class="gallery-button">
+                Ready for the surprise?
+            </a>
+
+            <div class="letter-signature">
+                Enjoy this <br />
+                <span class="name">From ur hot nd cute BF 🙃</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const envelope = document.getElementById('envelope');
+            const envelopeFlap = document.getElementById('envelopeFlap');
+            const clickText = document.getElementById('clickText');
+            const letter = document.getElementById('letter');
+            let isOpened = false;
+
+            envelope.addEventListener('click', function() {
+                if (!isOpened) {
+                    isOpened = true;
+
+                    // Hide click text
+                    clickText.classList.add('hidden');
+
+                    // Open envelope flap
+                    envelopeFlap.classList.add('opened');
+
+                    // Show letter after delay
+                    setTimeout(() => {
+                        letter.classList.add('visible');
+                    }, 1000);
+
+                    // Remove click handler
+                    envelope.style.cursor = 'default';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
